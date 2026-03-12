@@ -20,54 +20,50 @@
         margin: 0 !important;
     }
 
-    /* ── Base ── */
     .dash-wrapper {
-    background: #0f2240;
-    min-height: 100vh;
-    padding: 2rem 2.5rem;
-    width: 100%;
-    box-sizing: border-box;
-}
-    
+        background: #0f2240;
+        min-height: 100vh;
+        padding: 4rem 2.5rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-    /* ── Page Header ── */
-.dash-header {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* center the title */
-    margin-bottom: 1.5rem;
-    position: relative; /* allows button to be positioned on the right */
-}
+    .dash-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
 
-.dash-title {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #ffffff;
-    text-align: center;
-    position: absolute; /* pulls it out of flow so button stays right */
-    left: 50%;
-    transform: translateX(-50%);
-}
+    .dash-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ffffff;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 
-.new-request-btn {
-    background: #06b6d4;
-    color: white;
-    font-weight: 600;
-    font-size: 0.875rem;
-    padding: 0.6rem 1.2rem;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    transition: background 0.2s;
-    text-decoration: none;
-    margin-left: auto; /* pushes button to the far right */
-}
+    .new-request-btn {
+        background: #06b6d4;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: background 0.2s;
+        text-decoration: none;
+        margin-left: auto;
+    }
     .new-request-btn:hover { background: #0891b2; color: white; }
 
-    /* ── Department Banner ── */
     .dept-banner {
         background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
         border-radius: 20px;
@@ -75,7 +71,7 @@
         display: flex;
         align-items: center;
         gap: 1.25rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 3rem;
         position: relative;
         overflow: hidden;
     }
@@ -83,10 +79,8 @@
     .dept-banner::before {
         content: '';
         position: absolute;
-        right: -30px;
-        top: -30px;
-        width: 180px;
-        height: 180px;
+        right: -30px; top: -30px;
+        width: 180px; height: 180px;
         border-radius: 50%;
         background: rgba(255,255,255,0.08);
         pointer-events: none;
@@ -95,32 +89,26 @@
     .dept-banner::after {
         content: '';
         position: absolute;
-        right: 60px;
-        bottom: -50px;
-        width: 140px;
-        height: 140px;
+        right: 60px; bottom: -50px;
+        width: 140px; height: 140px;
         border-radius: 50%;
         background: rgba(255,255,255,0.05);
         pointer-events: none;
     }
 
     .dept-icon {
-        width: 56px;
-        height: 56px;
+        width: 56px; height: 56px;
         border-radius: 14px;
         background: rgba(255,255,255,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
-
     .dept-icon svg { width: 26px; height: 26px; color: #fff; }
 
     .dept-user-name {
         font-size: 1.25rem;
         font-weight: 1000;
-        color: rgba(0, 0, 0, 0.85);
+        color: rgba(0,0,0,0.85);
         margin-bottom: 0.15rem;
     }
 
@@ -145,10 +133,9 @@
         margin-top: 0.4rem;
     }
 
-    /* ── Stat Cards ── */
     .stat-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 1.25rem;
         margin-bottom: 1.5rem;
     }
@@ -170,29 +157,24 @@
     .stat-number { color: #0f172a; font-size: 2rem; font-weight: 800; }
 
     .stat-icon {
-        width: 52px;
-        height: 52px;
+        width: 52px; height: 52px;
         border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
     .stat-icon svg { width: 24px; height: 24px; }
 
-    /* ── Bottom Grid ── */
     .bottom-grid {
         display: grid;
-        grid-template-columns: 1fr 380px;
-        gap: 1.25rem;
+        grid-template-columns: 1fr 680px;
+        gap: 2rem;
     }
 
-    /* ── Calendar ── */
     .cal-card {
-        background: #ffffff;
+        background: #1e3a5f;
         border: 2px solid #000000;
-        border-radius: 16px;
-        padding: 1.5rem 1.75rem;
+        border-radius: 10px;
+        padding: 1rem;
     }
 
     .cal-top-bar {
@@ -202,47 +184,28 @@
         margin-bottom: 1.25rem;
     }
 
-    .cal-title {
-        font-size: 1rem;
-        font-weight: 800;
-        color: #0f172a;
-    }
+    .cal-title { font-size: 1rem; font-weight: 800; color: #ffffff; }
 
-    .cal-meta {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-    }
+    .cal-meta { display: flex; align-items: center; gap: 1.25rem; }
 
     .cal-clock {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.8rem;
-        color: #06b6d4;
-        font-weight: 600;
+        display: flex; align-items: center; gap: 5px;
+        font-size: 0.8rem; color: #ffffff; font-weight: 600;
     }
 
     .cal-month-label {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.8rem;
-        color: #374151;
-        font-weight: 600;
+        display: flex; align-items: center; gap: 5px;
+        font-size: 0.8rem; color: #ffffff; font-weight: 600;
     }
 
     .cal-nav { display: flex; gap: 6px; }
     .cal-nav-btn {
         background: #f8fafc;
         border: 1px solid #000000;
-        color: #64748b;
-        width: 30px;
-        height: 30px;
+        color: #ffffff;
+        width: 30px; height: 30px;
         border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         cursor: pointer;
         transition: all 0.15s;
     }
@@ -250,8 +213,8 @@
 
     .cal-grid { width: 100%; border-collapse: collapse; }
     .cal-grid th {
-        color: #000000;
-        font-size: 1rem;
+        color: #ffffff;
+        font-size: 0.75rem;
         font-weight: 600;
         text-align: center;
         padding: 6px 0 10px;
@@ -261,14 +224,11 @@
     .cal-grid td { text-align: center; padding: 3px; }
 
     .cal-day {
-        width: 40px;
-        height: 40px;
+        width: 40px; height: 40px;
         border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         font-size: 0.85rem;
-        color: #374151;
+        color: #ffffff;
         cursor: pointer;
         margin: 0 auto;
         position: relative;
@@ -292,100 +252,76 @@
     .cal-day.has-event::after {
         content: '';
         position: absolute;
-        bottom: 4px;
-        left: 50%;
+        bottom: 4px; left: 50%;
         transform: translateX(-50%);
-        width: 4px;
-        height: 4px;
+        width: 4px; height: 4px;
         border-radius: 50%;
         background: #f97316;
     }
     .cal-day.today.has-event::after { background: rgba(255,255,255,0.9); }
     .cal-day.other-month { color: #cbd5e1; cursor: default; }
 
-    /* ── Events Panel ── */
     .events-card {
-        background: #ffffff;
+        background: #1e3a5f;
         border: 2px solid #000000;
         border-radius: 16px;
-        padding: 1.5rem 1.75rem;
+        padding: 0.7rem 0.75rem;
     }
 
     .events-header {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        font-size: 0.9rem;
-        font-weight: 800;
-        color: #0f172a;
+        display: flex; align-items: center; gap: 7px;
+        font-size: 0.9rem; font-weight: 800;
+        color: #ffffff;
         margin-bottom: 1rem;
     }
-
     .events-header svg { color: #06b6d4; }
 
     .event-item {
-        background: #f8fafc;
+        background: #1c304b;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
         transition: border-color 0.15s;
     }
     .event-item:hover { border-color: #bae6fd; }
 
-    .event-top {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 5px;
-    }
+    .event-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 
     .event-icon {
-        width: 34px;
-        height: 34px;
+        width: 34px; height: 34px;
         border-radius: 9px;
         background: #e0f2fe;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
     .event-icon svg { width: 16px; height: 16px; color: #06b6d4; }
 
     .event-info { flex: 1; min-width: 0; }
-    .event-title { color: #0f172a; font-size: 0.83rem; font-weight: 600; }
+    .event-title { color: #ffffff; font-size: 0.83rem; font-weight: 600; }
     .event-type  { color: #94a3b8; font-size: 0.72rem; margin-top: 1px; }
 
     .event-bottom {
-        display: flex;
-        align-items: center;
+        display: flex; align-items: center;
         justify-content: space-between;
         margin-top: 6px;
     }
 
     .event-time-row {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        color: #94a3b8;
-        font-size: 0.72rem;
+        display: flex; align-items: center; gap: 4px;
+        color: #94a3b8; font-size: 0.72rem;
     }
 
     .event-badge {
-        font-size: 10px;
-        font-weight: 700;
-        padding: 2px 9px;
-        border-radius: 20px;
+        font-size: 10px; font-weight: 700;
+        padding: 2px 9px; border-radius: 20px;
     }
-    .badge-pending   { background: rgba(249,115,22,0.1);  color: #f97316; border: 1px solid rgba(249,115,22,0.2); }
-    .badge-completed,
-    .badge-signed    { background: rgba(34,197,94,0.1); color: #16a34a; border: 1px solid rgba(34,197,94,0.2); }
+    .badge-pending  { background: rgba(249,115,22,0.1); color: #f97316; border: 1px solid rgba(249,115,22,0.2); }
+    .badge-signed   { background: rgba(34,197,94,0.1);  color: #16a34a; border: 1px solid rgba(34,197,94,0.2); }
 
     .cal-empty {
-        color: #94a3b8;
-        font-size: 0.8rem;
-        text-align: center;
-        padding: 2.5rem 0;
+        color: #94a3b8; font-size: 0.8rem;
+        text-align: center; padding: 2.5rem 0;
         font-style: italic;
     }
 </style>
@@ -426,35 +362,9 @@
     {{-- ── Stat Cards ── --}}
     <div class="stat-grid">
 
-       <a href="{{ route('requestor.pending') }}" class="stat-card" style="text-decoration:none;">
-            <div>
-                <div class="stat-label">Documents Signed</div>
-                <div class="stat-number">{{ $signedCount ?? 0 }}</div>
-            </div>
-            <div class="stat-icon" style="background:#dcfce7;">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:#16a34a;">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-        </a>
-
-       <a href="{{ route('requestor.pending') }}" class="stat-card" style="text-decoration:none;">
-    <div>
-        <div class="stat-label">Pending Requests</div>
-        <div class="stat-number">{{ $pendingCount ?? 0 }}</div>
-    </div>
-    <div class="stat-icon" style="background:#fff7ed;">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:#f97316;">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-    </div>
-</a>
-
         <div class="stat-card">
             <div>
-                <div class="stat-label">Sent Requests</div>
+                <div class="stat-label">Total Requests</div>
                 <div class="stat-number">{{ $totalRequests ?? 0 }}</div>
             </div>
             <div class="stat-icon" style="background:#e0f2fe;">
@@ -465,12 +375,50 @@
             </div>
         </div>
 
+        <a href="{{ route('requestor.pending') }}" class="stat-card">
+            <div>
+                <div class="stat-label">Pending</div>
+                <div class="stat-number">{{ $pendingCount ?? 0 }}</div>
+            </div>
+            <div class="stat-icon" style="background:#fff7ed;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:#f97316;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </a>
+
+        <a href="{{ route('requestor.approved') }}" class="stat-card">
+            <div>
+                <div class="stat-label">Approved</div>
+                <div class="stat-number">{{ $approvedCount ?? 0 }}</div>
+            </div>
+            <div class="stat-icon" style="background:#dcfce7;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:#16a34a;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </a>
+
+        <a href="{{ route('requestor.rejected') }}" class="stat-card">
+            <div>
+                <div class="stat-label">Rejected</div>
+                <div class="stat-number">{{ $rejectedCount ?? 0 }}</div>
+            </div>
+            <div class="stat-icon" style="background:#fee2e2;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:#dc2626;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </a>
+
     </div>
 
     {{-- ── Bottom: Calendar + Events ── --}}
     <div class="bottom-grid">
 
-        {{-- Calendar --}}
         <div class="cal-card">
             <div class="cal-top-bar">
                 <div class="cal-title">Calendar</div>
@@ -517,7 +465,6 @@
             </table>
         </div>
 
-        {{-- Events --}}
         <div class="events-card">
             <div class="events-header">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
@@ -568,22 +515,38 @@
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         const daysInPrev  = new Date(currentYear, currentMonth, 0).getDate();
 
-        let html = '', day = 1, nextDay = 1;
+        // Build a flat array of all cells first, then chunk into rows
+        const cells = [];
 
-        for (let row = 0; row < 6; row++) {
+        // Previous month trailing days
+        for (let i = 0; i < firstDay; i++) {
+            cells.push({ day: daysInPrev - firstDay + i + 1, type: 'prev' });
+        }
+
+        // Current month days
+        for (let d = 1; d <= daysInMonth; d++) {
+            cells.push({ day: d, type: 'current' });
+        }
+
+        // Next month leading days — fill to complete the last row
+        const remaining = cells.length % 7 === 0 ? 0 : 7 - (cells.length % 7);
+        for (let i = 1; i <= remaining; i++) {
+            cells.push({ day: i, type: 'next' });
+        }
+
+        // Render rows
+        let html = '';
+        for (let i = 0; i < cells.length; i += 7) {
             html += '<tr>';
-            for (let col = 0; col < 7; col++) {
-                const cellIndex = row * 7 + col;
-
-                if (cellIndex < firstDay) {
-                    const d = daysInPrev - firstDay + cellIndex + 1;
-                    html += `<td><div class="cal-day other-month">${d}</div></td>`;
-                } else if (day > daysInMonth) {
-                    html += `<td><div class="cal-day other-month">${nextDay++}</div></td>`;
+            for (let j = i; j < i + 7; j++) {
+                const cell = cells[j];
+                if (cell.type !== 'current') {
+                    html += `<td><div class="cal-day other-month">${cell.day}</div></td>`;
                 } else {
-                    const isToday    = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-                    const isSelected = day === selectedDay;
-                    const key        = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const d          = cell.day;
+                    const isToday    = d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                    const isSelected = d === selectedDay;
+                    const key        = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                     const hasEvent   = !!docMap[key];
 
                     let cls = 'cal-day';
@@ -591,12 +554,10 @@
                     else if (isSelected) cls += ' selected';
                     if (hasEvent)        cls += ' has-event';
 
-                    html += `<td><div class="${cls}" onclick="selectDay(${day})">${day}</div></td>`;
-                    day++;
+                    html += `<td><div class="${cls}" onclick="selectDay(${d})">${d}</div></td>`;
                 }
             }
             html += '</tr>';
-            if (day > daysInMonth) break;
         }
 
         body.innerHTML = html;
@@ -677,21 +638,16 @@
         });
     }
 
+    // ── KEY FIX: re-render calendar whenever the tab becomes visible again ──
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') {
+            renderCalendar();
+        }
+    });
+
     setInterval(updateClock, 1000);
     updateClock();
     renderCalendar();
-
-    // Force full page via JS fallback
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('body > div, body > main, body > section, main').forEach(el => {
-            el.style.background = '#f1f5f9';
-            el.style.minHeight  = '100vh';
-            el.style.width      = '100%';
-            el.style.maxWidth   = '100%';
-            el.style.padding    = '0';
-            el.style.margin     = '0';
-        });
-    });
 </script>
 
 </x-layouts::app>

@@ -106,9 +106,7 @@
 
     .preview-overlay {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 0; left: 0; right: 0;
         height: 40px;
         z-index: 10;
         background: rgba(0,0,0,0.6);
@@ -152,13 +150,10 @@
     }
 
     .recipient-avatar {
-        width: 36px;
-        height: 36px;
+        width: 36px; height: 36px;
         border-radius: 50%;
         background: #3b82f6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         font-size: 0.75rem;
         font-weight: 700;
         color: white;
@@ -166,15 +161,12 @@
     }
 
     .remove-btn {
-        width: 28px;
-        height: 28px;
+        width: 28px; height: 28px;
         border-radius: 50%;
         background: #ef4444;
         border: none;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
 
@@ -231,8 +223,7 @@
 
     .search-icon {
         position: absolute;
-        left: 10px;
-        top: 50%;
+        left: 10px; top: 50%;
         transform: translateY(-50%);
         color: #4b5563;
         pointer-events: none;
@@ -241,8 +232,7 @@
     .user-dropdown {
         position: absolute;
         top: calc(100% + 6px);
-        left: 0;
-        right: 0;
+        left: 0; right: 0;
         background: #1e1e1e;
         border: 1px solid #2a2a2a;
         border-radius: 10px;
@@ -273,50 +263,41 @@
     .user-option:hover { background: #262626; }
 
     .user-option-avatar {
-        width: 32px;
-        height: 32px;
+        width: 32px; height: 32px;
         border-radius: 50%;
         background: #3b82f6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px;
         font-weight: 700;
         color: #fff;
         flex-shrink: 0;
     }
 
-    .user-option-name {
-        color: #f9fafb;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .user-option-email {
-        color: #6b7280;
-        font-size: 0.75rem;
-    }
+    .user-option-name  { color: #f9fafb; font-size: 0.875rem; font-weight: 500; }
+    .user-option-email { color: #ffffff; font-size: 0.72rem; }
+    .user-option-meta  { color: #4b83c0; font-size: 0.68rem; margin-top: 1px; }
 
     .user-option-badge {
         margin-left: auto;
         background: rgba(59,130,246,0.15);
         border: 1px solid rgba(59,130,246,0.3);
         color: #60a5fa;
-        font-size: 10px;
+        font-size: 16px;
         font-weight: 700;
         padding: 2px 8px;
         border-radius: 20px;
         text-transform: capitalize;
+        flex-shrink: 0;
     }
 
     .no-results {
         padding: 14px;
-        color: #6b7280;
+        color: #ffffff;
         font-size: 0.82rem;
         text-align: center;
     }
 
-    /* Selected user chip */
+    /* ── Selected user chip ── */
     .selected-user-chip {
         display: flex;
         align-items: center;
@@ -324,12 +305,15 @@
         background: rgba(59,130,246,0.1);
         border: 1px solid rgba(59,130,246,0.3);
         border-radius: 8px;
-        padding: 6px 12px;
+        padding: 8px 12px;
         width: 100%;
     }
 
-    .selected-user-chip .chip-name { color: #f9fafb; font-size: 0.875rem; font-weight: 500; }
-    .selected-user-chip .chip-email { color: #6b7280; font-size: 0.75rem; }
+    .selected-user-chip .chip-name     { color: #f9fafb; font-size: 0.875rem; font-weight: 600; }
+    .selected-user-chip .chip-details  { display: flex; align-items: center; gap: 1.25rem; margin-top: 3px; flex-wrap: wrap; }
+    .selected-user-chip .chip-email    { color: #706c6c; font-size: 1rem; }
+    .selected-user-chip .chip-position { color: #ffffff; font-size: 0.9rem; }
+    .selected-user-chip .chip-division { color: #ffffff; font-size: 0.9rem; }
 
     .chip-clear {
         margin-left: auto;
@@ -341,6 +325,7 @@
         line-height: 1;
         font-size: 16px;
         transition: color 0.15s;
+        flex-shrink: 0;
     }
 
     .chip-clear:hover { color: #ef4444; }
@@ -358,78 +343,76 @@
   </div>
 </div>
 
-    <form id="nr-form" method="POST" action="{{ route('documents.store') }}" enctype="multipart/form-data">
-        @csrf
+<form id="nr-form" method="POST" action="{{ route('documents.store') }}" enctype="multipart/form-data">
+    @csrf
 
-        {{-- ── Document Details ── --}}
-        <div class="nr-card">
-            <div class="nr-section-title">Document Details</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+    {{-- ── Document Details ── --}}
+    <div class="nr-card">
+        <div class="nr-section-title">Document Details</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
 
-                <div class="flex flex-col items-center">
-                    <div class="upload-zone w-full" id="upload-zone">
-                        <div id="upload-placeholder" class="w-full h-full flex flex-col items-center justify-center"
-                             onclick="document.getElementById('pdf-upload').click()">
-                            <svg style="width:2rem;height:2rem;display:block;margin:0 auto 0.75rem;color:#3b82f6;"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-                            </svg>
-                            <span id="upload-label">Click to upload PDF document</span>
-                        </div>
-                        <iframe id="pdf-frame" class="pdf-frame-preview hidden"></iframe>
-                        <div id="preview-overlay" class="preview-overlay hidden"
-                             onclick="window.open(pdfUrl, '_blank')">
-                            Click to expand full preview ↗
-                        </div>
+            <div class="flex flex-col items-center">
+                <div class="upload-zone w-full" id="upload-zone">
+                    <div id="upload-placeholder" class="w-full h-full flex flex-col items-center justify-center"
+                         onclick="document.getElementById('pdf-upload').click()">
+                        <svg style="width:2rem;height:2rem;display:block;margin:0 auto 0.75rem;color:#3b82f6;"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                        </svg>
+                        <span id="upload-label">Click to upload PDF document</span>
                     </div>
-                    <button type="button" id="change-doc-btn" class="change-btn hidden"
-                            onclick="triggerChange()">Change Document</button>
-                    <input type="file" id="pdf-upload" name="document" accept=".pdf"
-                           class="hidden" onchange="updateUploadLabel(event)"/>
+                    <iframe id="pdf-frame" class="pdf-frame-preview hidden"></iframe>
+                    <div id="preview-overlay" class="preview-overlay hidden"
+                         onclick="window.open(pdfUrl, '_blank')">
+                        Click to expand full preview ↗
+                    </div>
                 </div>
+                <button type="button" id="change-doc-btn" class="change-btn hidden"
+                        onclick="triggerChange()">Change Document</button>
+                <input type="file" id="pdf-upload" name="document" accept=".pdf"
+                       class="hidden" onchange="updateUploadLabel(event)"/>
+            </div>
 
-                <div class="flex flex-col gap-4">
-                    <div>
-                        <label class="nr-label">Document Title</label>
-                        <input name="title" type="text" class="nr-input"
-                               placeholder="Document Title" required/>
-                    </div>
-                    <div>
-                        <label class="nr-label">Message to Signer(s)</label>
-                        <textarea name="message" class="nr-textarea" rows="3"
-                                  placeholder="Message to Signer(s)"></textarea>
-                    </div>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="nr-label">Document Title</label>
+                    <input name="title" type="text" class="nr-input"
+                           placeholder="Document Title" required/>
+                </div>
+                <div>
+                    <label class="nr-label">Message to Signer(s)</label>
+                    <textarea name="message" class="nr-textarea" rows="3"
+                              placeholder="Message to Signer(s)"></textarea>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- ── Recipients ── --}}
-        <div class="nr-card">
-            <div class="nr-section-title">Recipients</div>
-            <div id="recipients-list"></div>
-            <button type="button" class="add-recipient-btn" onclick="addRecipient()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                </svg>
-                Add Recipient
-            </button>
-        </div>
+    {{-- ── Recipients ── --}}
+    <div class="nr-card">
+        <div class="nr-section-title">Recipients</div>
+        <div id="recipients-list"></div>
+        <button type="button" class="add-recipient-btn" onclick="addRecipient()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            Add Recipient
+        </button>
+    </div>
 
-        <div class="flex justify-center mt-4">
-            <button type="submit" class="send-btn" style="padding:0.8rem 4rem;font-size:1rem;">
-                Review & Send
-            </button>
-        </div>
-    </form>
-</div>
+    <div class="flex justify-center mt-4">
+        <button type="submit" class="send-btn" style="padding:0.8rem 4rem;font-size:1rem;">
+            Review & Send
+        </button>
+    </div>
+</form>
 
 <script>
     let recipientCount = 0;
     let pdfUrl = null;
 
-    // All registered signee/signer users passed from the controller
     const allUsers = @json($signees);
 
     function triggerChange() {
@@ -441,16 +424,13 @@
     function updateUploadLabel(event) {
         const file = event.target.files[0];
         const placeholder = document.getElementById('upload-placeholder');
-        const pdfFrame = document.getElementById('pdf-frame');
-        const overlay = document.getElementById('preview-overlay');
-        const zone = document.getElementById('upload-zone');
-        const changeBtn = document.getElementById('change-doc-btn');
+        const pdfFrame    = document.getElementById('pdf-frame');
+        const overlay     = document.getElementById('preview-overlay');
+        const zone        = document.getElementById('upload-zone');
+        const changeBtn   = document.getElementById('change-doc-btn');
 
         if (file) {
-            if (file.type !== 'application/pdf') {
-                alert('Please upload a valid PDF.');
-                return;
-            }
+            if (file.type !== 'application/pdf') { alert('Please upload a valid PDF.'); return; }
             if (pdfUrl) URL.revokeObjectURL(pdfUrl);
             pdfUrl = URL.createObjectURL(file);
             placeholder.classList.add('hidden');
@@ -465,9 +445,9 @@
 
     function addRecipient() {
         recipientCount++;
-        const id = recipientCount;
+        const id   = recipientCount;
         const list = document.getElementById('recipients-list');
-        const row = document.createElement('div');
+        const row  = document.createElement('div');
         row.className = 'recipient-row';
         row.id = 'recipient-' + id;
 
@@ -475,6 +455,7 @@
             <div class="recipient-avatar" id="avatar-${id}">${id}</div>
 
             <div class="user-search-wrap" id="search-wrap-${id}">
+
                 <!-- Search input -->
                 <div id="search-box-${id}" style="position:relative;">
                     <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
@@ -490,21 +471,24 @@
                         oninput="filterUsers(${id})"
                         onfocus="openDropdown(${id})"
                     />
-                    <!-- Hidden actual email value sent to server -->
                     <input type="hidden" name="recipients[${id}][email]" id="selected-email-${id}" required />
                 </div>
 
-                <!-- Dropdown list -->
+                <!-- Dropdown -->
                 <div class="user-dropdown" id="dropdown-${id}">
                     <div class="no-results" id="no-results-${id}" style="display:none;">No users found.</div>
                 </div>
 
-                <!-- Selected user chip (shown after selection) -->
+                <!-- Selected chip -->
                 <div id="chip-${id}" style="display:none;">
                     <div class="selected-user-chip">
-                        <div>
+                        <div style="flex:1;min-width:0;">
                             <div class="chip-name" id="chip-name-${id}"></div>
-                            <div class="chip-email" id="chip-email-${id}"></div>
+                            <div class="chip-details">
+                                <div class="chip-email"    id="chip-email-${id}"></div>
+                                <div class="chip-position" id="chip-position-${id}"></div>
+                                <div class="chip-division" id="chip-division-${id}"></div>
+                            </div>
                         </div>
                         <button type="button" class="chip-clear" onclick="clearSelection(${id})" title="Clear">✕</button>
                     </div>
@@ -521,41 +505,35 @@
         list.appendChild(row);
         renderDropdown(id, allUsers);
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function closeHandler(e) {
+        document.addEventListener('click', function(e) {
             const wrap = document.getElementById('search-wrap-' + id);
-            if (wrap && !wrap.contains(e.target)) {
-                closeDropdown(id);
-            }
+            if (wrap && !wrap.contains(e.target)) closeDropdown(id);
         });
     }
 
     function renderDropdown(id, users) {
-        const dropdown = document.getElementById('dropdown-' + id);
+        const dropdown  = document.getElementById('dropdown-' + id);
         const noResults = document.getElementById('no-results-' + id);
 
-        // Remove old user options
         dropdown.querySelectorAll('.user-option').forEach(el => el.remove());
 
-        if (users.length === 0) {
-            noResults.style.display = 'block';
-            return;
-        }
-
+        if (users.length === 0) { noResults.style.display = 'block'; return; }
         noResults.style.display = 'none';
 
         users.forEach(user => {
             const initials = ((user.firstname?.[0] ?? '') + (user.lastname?.[0] ?? '')).toUpperCase() || '?';
             const fullName = (user.firstname + ' ' + user.lastname).trim() || user.email;
             const role     = user.role ?? 'signee';
+            const meta     = [user.position, user.division].filter(Boolean).join(' · ');
 
             const option = document.createElement('div');
             option.className = 'user-option';
             option.innerHTML = `
                 <div class="user-option-avatar">${initials}</div>
-                <div>
+                <div style="min-width:0;flex:1;">
                     <div class="user-option-name">${fullName}</div>
                     <div class="user-option-email">${user.email}</div>
+                    ${meta ? `<div class="user-option-meta">${meta}</div>` : ''}
                 </div>
                 <span class="user-option-badge">${role}</span>
             `;
@@ -565,7 +543,7 @@
     }
 
     function filterUsers(id) {
-        const query = document.getElementById('search-input-' + id).value.toLowerCase();
+        const query    = document.getElementById('search-input-' + id).value.toLowerCase();
         const filtered = allUsers.filter(u => {
             const fullName = ((u.firstname ?? '') + ' ' + (u.lastname ?? '')).toLowerCase();
             return fullName.includes(query) || u.email.toLowerCase().includes(query);
@@ -574,29 +552,21 @@
         openDropdown(id);
     }
 
-    function openDropdown(id) {
-        const dropdown = document.getElementById('dropdown-' + id);
-        if (dropdown) dropdown.classList.add('open');
-    }
-
-    function closeDropdown(id) {
-        const dropdown = document.getElementById('dropdown-' + id);
-        if (dropdown) dropdown.classList.remove('open');
-    }
+    function openDropdown(id)  { const d = document.getElementById('dropdown-' + id); if (d) d.classList.add('open'); }
+    function closeDropdown(id) { const d = document.getElementById('dropdown-' + id); if (d) d.classList.remove('open'); }
 
     function selectUser(id, user) {
         const fullName = (user.firstname + ' ' + user.lastname).trim() || user.email;
 
-        // Set hidden email input
-        document.getElementById('selected-email-' + id).value = user.email;
+        document.getElementById('selected-email-' + id).value       = user.email;
+        document.getElementById('chip-name-' + id).textContent      = fullName;
+        document.getElementById('chip-email-' + id).textContent     = user.email;
+        document.getElementById('chip-position-' + id).textContent  = user.position ?? '';
+        document.getElementById('chip-division-' + id).textContent  = user.division ?? '';
 
-        // Show chip, hide search box
-        document.getElementById('chip-name-' + id).textContent = fullName;
-        document.getElementById('chip-email-' + id).textContent = user.email;
         document.getElementById('search-box-' + id).style.display = 'none';
-        document.getElementById('chip-' + id).style.display = 'block';
+        document.getElementById('chip-' + id).style.display       = 'block';
 
-        // Update avatar initials
         const initials = ((user.firstname?.[0] ?? '') + (user.lastname?.[0] ?? '')).toUpperCase() || '?';
         document.getElementById('avatar-' + id).textContent = initials;
 
@@ -604,11 +574,13 @@
     }
 
     function clearSelection(id) {
-        document.getElementById('selected-email-' + id).value = '';
-        document.getElementById('search-input-' + id).value = '';
-        document.getElementById('chip-' + id).style.display = 'none';
-        document.getElementById('search-box-' + id).style.display = 'block';
-        document.getElementById('avatar-' + id).textContent = id;
+        document.getElementById('selected-email-' + id).value      = '';
+        document.getElementById('search-input-' + id).value        = '';
+        document.getElementById('chip-position-' + id).textContent = '';
+        document.getElementById('chip-division-' + id).textContent = '';
+        document.getElementById('chip-' + id).style.display        = 'none';
+        document.getElementById('search-box-' + id).style.display  = 'block';
+        document.getElementById('avatar-' + id).textContent        = id;
         renderDropdown(id, allUsers);
     }
 
@@ -617,7 +589,6 @@
         if (row) row.remove();
     }
 
-    // Auto-add first recipient row on load
     addRecipient();
 </script>
-</x-layouts::app>   
+</x-layouts::app>

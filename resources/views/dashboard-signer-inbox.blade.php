@@ -22,6 +22,7 @@
     .badge { display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;margin-right:4px; }
     .badge-pending { background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#f59e0b; }
     .badge-completed { background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981; }
+    .badge-rejected { background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444; }
     .badge-dot { width:7px;height:7px;border-radius:50%;background:currentColor; }
     .doc-action-meta { color:#6b7280;font-size:.78rem;display:inline-flex;align-items:center;gap:5px; }
     .doc-action-meta svg { width:13px;height:13px; }
@@ -30,6 +31,8 @@
     .btn-sign:hover { background:#2563eb;transform:translateY(-1px);color:#fff; }
     .btn-view { background:transparent;color:#9ca3af;border:1px solid #2a2a2a;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center; }
     .btn-view:hover { border-color:#444;color:#e5e7eb; }
+    .btn-reject { background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:#ef4444;font-size:13px;font-weight:600;transition:background .15s; }
+    .btn-reject:hover { background:rgba(239,68,68,.2); }
     .btn-send { background:#10b981;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s; }
     .btn-send:hover { background:#059669; }
     .btn-send-disabled { opacity:.6;cursor:not-allowed; }
@@ -68,33 +71,10 @@
     .sidebar-hint { margin-top:auto;color:#2a2a2a;font-size:.58rem;text-align:center;line-height:1.5;padding-top:.5rem; }
 
     .pdf-area { flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:#0a0a0a; }
-
-    /* PDF.js canvas container */
-    .pdf-canvas-wrap {
-        flex:1;
-        min-height:0;
-        position:relative;
-        overflow:auto;
-        background:#525659;
-        display:flex;
-        align-items:flex-start;
-        justify-content:center;
-    }
-    .pdf-canvas-inner {
-        position:relative;
-        display:inline-block;
-        margin: 8px auto;
-    }
-    #pdf-render-canvas {
-        display:block;
-        box-shadow:0 2px 12px rgba(0,0,0,.5);
-    }
-    .pdf-interact-layer {
-        position:absolute;
-        inset:0;
-        z-index:5;
-        cursor:crosshair;
-    }
+    .pdf-canvas-wrap { flex:1;min-height:0;position:relative;overflow:auto;background:#525659;display:flex;align-items:flex-start;justify-content:center; }
+    .pdf-canvas-inner { position:relative;display:inline-block;margin:8px auto; }
+    #pdf-render-canvas { display:block;box-shadow:0 2px 12px rgba(0,0,0,.5); }
+    .pdf-interact-layer { position:absolute;inset:0;z-index:5;cursor:crosshair; }
 
     .pdf-nav { display:flex;align-items:center;justify-content:center;gap:12px;padding:7px 16px;border-top:1px solid #1a1a1a;background:#0c0c0c;flex-shrink:0; }
     .nav-btn { background:#1a1a1a;border:1px solid #272727;border-radius:7px;color:#9ca3af;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s; }
@@ -115,7 +95,6 @@
     #sig-ghost-border { position:absolute;inset:0;border:2px dashed #3b82f6;border-radius:4px; }
 </style>
 
-{{-- PDF.js from CDN --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -179,8 +158,11 @@
             previewUrl: '',
             previewTitle: '',
             docId: null,
+            docStatus: '',
             sending: false,
             sendSuccess: false,
+            rejecting: false,
+            rejectSuccess: false,
             sigSrc: '{{ auth()->user()->esig ? asset('storage/' . auth()->user()->esig) : '' }}',
             currentPage: 1,
             totalPages: 1,
@@ -196,9 +178,10 @@
             hasSigs()      { return Object.values(this.placements).some(a=>a&&a.length>0); },
             delSig(pg,id)  { if(this.placements[pg]) this.placements[pg]=this.placements[pg].filter(s=>s.id!==id); },
 
-            open(url,title,id){
+            open(url, title, id, status = 'pending'){
                 this.previewUrl=url; this.previewTitle=title; this.docId=id;
-                this.showModal=true; this.sendSuccess=false;
+                this.docStatus=status;
+                this.showModal=true; this.sendSuccess=false; this.rejectSuccess=false;
                 this.placements={}; this.currentPage=1; this.totalPages=1; this.ix=null;
                 this.pdfDoc=null; this.canvasW=0; this.canvasH=0;
                 window.__sd=false;
@@ -206,7 +189,8 @@
             },
             close(){
                 this.showModal=false; this.previewUrl=''; this.docId=null;
-                this.sendSuccess=false; this.placements={}; this.ix=null;
+                this.sendSuccess=false; this.rejectSuccess=false;
+                this.placements={}; this.ix=null;
                 window.__pdfDoc = null;
                 window.__sd=false;
                 const g=document.getElementById('sig-ghost'); if(g) g.style.display='none';
@@ -214,67 +198,41 @@
 
             async loadPdf(){
                 try {
-                    console.log('Loading PDF:', this.previewUrl);
                     const loadingTask = pdfjsLib.getDocument({ url: this.previewUrl });
                     window.__pdfDoc = await loadingTask.promise;
                     this.totalPages = window.__pdfDoc.numPages;
-                    console.log('PDF loaded, pages:', this.totalPages);
                     await this.renderPage(this.currentPage);
-                } catch(e){
-                    console.error('PDF load error:', e);
-                    alert('Could not load PDF: ' + e.message);
-                }
+                } catch(e){ alert('Could not load PDF: ' + e.message); }
             },
 
             async renderPage(pageNum){
                 if(!window.__pdfDoc) return;
                 try {
                     const page = await window.__pdfDoc.getPage(pageNum);
-
                     await this.$nextTick();
                     const wrap = document.getElementById('pdf-canvas-wrap');
                     const containerW = wrap ? Math.max(wrap.clientWidth - 16, 400) : 400;
-
                     const viewport0 = page.getViewport({ scale: 1 });
                     const scale = containerW / viewport0.width;
                     const viewport = page.getViewport({ scale });
-
                     const canvas = document.getElementById('pdf-render-canvas');
                     if(!canvas) return;
                     canvas.width  = viewport.width;
                     canvas.height = viewport.height;
                     this.canvasW  = viewport.width;
                     this.canvasH  = viewport.height;
-
                     const inner = document.getElementById('pdf-canvas-inner');
-                    if(inner){
-                        inner.style.width  = viewport.width  + 'px';
-                        inner.style.height = viewport.height + 'px';
-                    }
-
+                    if(inner){ inner.style.width=viewport.width+'px'; inner.style.height=viewport.height+'px'; }
                     const ctx = canvas.getContext('2d');
                     await page.render({ canvasContext: ctx, viewport }).promise;
-                    console.log('Page rendered:', pageNum, viewport.width, 'x', viewport.height);
-                } catch(e){
-                    console.error('Render error:', e);
-                }
+                } catch(e){ console.error('Render error:', e); }
             },
 
-            async prev(){
-                if(this.currentPage>1){
-                    this.currentPage--;
-                    await this.renderPage(this.currentPage);
-                }
-            },
-            async next(){
-                if(this.currentPage<this.totalPages){
-                    this.currentPage++;
-                    await this.renderPage(this.currentPage);
-                }
-            },
+            async prev(){ if(this.currentPage>1){ this.currentPage--; await this.renderPage(this.currentPage); } },
+            async next(){ if(this.currentPage<this.totalPages){ this.currentPage++; await this.renderPage(this.currentPage); } },
 
             chipDown(e){
-                if(!this.sigSrc) return;
+                if(!this.sigSrc || this.docStatus !== 'pending') return;
                 e.preventDefault();
                 window.__sd=true;
                 const g=document.getElementById('sig-ghost');
@@ -284,20 +242,16 @@
             },
 
             moveDown(e,pg,id){
-                if(e.target.classList.contains('placed-sig-resize')||
-                   e.target.classList.contains('placed-sig-del')) return;
+                if(e.target.classList.contains('placed-sig-resize')||e.target.classList.contains('placed-sig-del')) return;
                 const sig=this.getSig(pg,id); if(!sig) return;
                 e.preventDefault(); e.stopPropagation();
                 const cr=document.getElementById('pdf-canvas-inner').getBoundingClientRect();
-                this.ix={ type:'move', pg, id,
-                    offX:e.clientX-cr.left-sig.x,
-                    offY:e.clientY-cr.top-sig.y, cr };
+                this.ix={ type:'move', pg, id, offX:e.clientX-cr.left-sig.x, offY:e.clientY-cr.top-sig.y, cr };
             },
             resizeDown(e,pg,id){
                 e.preventDefault(); e.stopPropagation();
                 const sig=this.getSig(pg,id); if(!sig) return;
-                this.ix={ type:'resize', pg, id,
-                    sx:e.clientX, sy:e.clientY, sw:sig.w, sh:sig.h };
+                this.ix={ type:'resize', pg, id, sx:e.clientX, sy:e.clientY, sw:sig.w, sh:sig.h };
             },
 
             gMove(e){
@@ -324,30 +278,17 @@
                     window.__sd=false;
                     const g=document.getElementById('sig-ghost');
                     g.style.display='none';
+                    if(this.docStatus !== 'pending'){ this.ix=null; return; }
                     const cv=document.getElementById('pdf-canvas-inner');
                     if(cv){
                         const cr=cv.getBoundingClientRect();
-                        if(e.clientX>=cr.left&&e.clientX<=cr.right&&
-                           e.clientY>=cr.top&&e.clientY<=cr.bottom){
+                        if(e.clientX>=cr.left&&e.clientX<=cr.right&&e.clientY>=cr.top&&e.clientY<=cr.bottom){
                             const pg=this.currentPage;
                             if(!this.placements[pg]) this.placements[pg]=[];
-
-                            const sigImg = new Image();
-                            sigImg.src = this.sigSrc;
-                            const naturalW = sigImg.naturalWidth || 180;
-                            const naturalH = sigImg.naturalHeight || 80;
-                            const sigW = 180;
-                            const sigH = Math.round((naturalH / naturalW) * sigW);
-
-                            this.placements[pg]=[
-                                ...this.placements[pg],
-                                { id:Date.now(),
-                                x:Math.max(0,e.clientX-cr.left-90),
-                                y:Math.max(0,e.clientY-cr.top-(sigH/2)),
-                                w:sigW, h:sigH,
-                                canvas_w: this.canvasW,
-                                canvas_h: this.canvasH }
-                            ];
+                            const sigImg=new Image(); sigImg.src=this.sigSrc;
+                            const naturalW=sigImg.naturalWidth||180; const naturalH=sigImg.naturalHeight||80;
+                            const sigW=180; const sigH=Math.round((naturalH/naturalW)*sigW);
+                            this.placements[pg]=[...this.placements[pg],{ id:Date.now(), x:Math.max(0,e.clientX-cr.left-90), y:Math.max(0,e.clientY-cr.top-(sigH/2)), w:sigW, h:sigH, canvas_w:this.canvasW, canvas_h:this.canvasH }];
                         }
                     }
                 }
@@ -362,38 +303,53 @@
                     const signatures=[];
                     for(const [pg,sigs] of Object.entries(this.placements)){
                         for(const s of sigs){
-                            signatures.push({
-                                page: parseInt(pg),
-                                sig_x: s.x,
-                                sig_y: s.y,
-                                sig_w: s.w,
-                                sig_h: s.h,
-                                canvas_w: s.canvas_w,
-                                canvas_h: s.canvas_h
-                            });
+                            signatures.push({ page:parseInt(pg), sig_x:s.x, sig_y:s.y, sig_w:s.w, sig_h:s.h, canvas_w:s.canvas_w, canvas_h:s.canvas_h });
                         }
                     }
-                    const payload={ signatures };
                     const res=await fetch(`/documents/${this.docId}/sign`,{
                         method:'POST',
-                        headers:{'Content-Type':'application/json',
-                                 'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content},
-                        body:JSON.stringify(payload)
+                        headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content},
+                        body:JSON.stringify({ signatures })
                     });
-                    if(!res.ok){
-                        alert(res.status===403?'Unauthorized.':
-                              res.status===404?'Route not found.':
-                              res.status===422?'Please upload your e-signature first.':
-                              'Error '+res.status);
-                        return;
-                    }
+                    if(!res.ok){ alert(res.status===403?'Unauthorized.':res.status===404?'Route not found.':res.status===422?'Please upload your e-signature first.':'Error '+res.status); return; }
                     const data=await res.json();
-                    if(data.success){
-                        this.sendSuccess=true;
-                        setTimeout(()=>{ this.close(); window.location.reload(); },1200);
-                    } else { alert(data.message||'Signing failed.'); }
+                    if(data.success){ this.sendSuccess=true; setTimeout(()=>{ this.close(); window.location.reload(); },1200); }
+                    else { alert(data.message||'Signing failed.'); }
                 } catch(e){ alert('Network error: '+e.message); }
                 finally { this.sending=false; }
+            },
+
+            async reject(){
+                if(!this.docId||this.rejecting) return;
+                if(!confirm('Are you sure you want to reject this document?')) return;
+                this.rejecting=true;
+                try {
+                    const res=await fetch(`/documents/${this.docId}/reject`,{
+                        method:'POST',
+                        headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}
+                    });
+                    if(!res.ok){ alert('Failed to reject. Error '+res.status); return; }
+                    const data=await res.json();
+                    if(data.success){ this.rejectSuccess=true; setTimeout(()=>{ this.close(); window.location.reload(); },1000); }
+                    else { alert(data.message||'Reject failed.'); }
+                } catch(e){ alert('Network error: '+e.message); }
+                finally { this.rejecting=false; }
+            },
+
+            async rejectCard(id){
+                if(!confirm('Are you sure you want to reject this document?')) return;
+                this.docId=id; this.rejecting=true;
+                try {
+                    const res=await fetch(`/documents/${id}/reject`,{
+                        method:'POST',
+                        headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}
+                    });
+                    if(!res.ok){ alert('Failed to reject. Error '+res.status); return; }
+                    const data=await res.json();
+                    if(data.success){ window.location.reload(); }
+                    else { alert(data.message||'Reject failed.'); }
+                } catch(e){ alert('Network error: '+e.message); }
+                finally { this.rejecting=false; this.docId=null; }
             },
         }"
         @mousemove.window="gMove($event)"
@@ -419,6 +375,7 @@
                  x-transition:enter-end="opacity-100 scale-100"
                  class="modal-box">
 
+                {{-- Modal Header --}}
                 <div class="modal-header">
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div style="background:rgba(59,130,246,.12);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;">
@@ -426,19 +383,27 @@
                         </div>
                         <div>
                             <div style="color:#f9fafb;font-weight:600;font-size:.95rem;" x-text="previewTitle"></div>
-                            <div style="color:#6b7280;font-size:.72rem;">Hold &amp; drag your signature from the left panel onto the document</div>
+                            <div style="color:#6b7280;font-size:.72rem;" x-text="docStatus === 'signed' ? 'View only — document already signed' : 'Hold & drag your signature from the left panel onto the document'"></div>
                         </div>
                     </div>
-                    <button @click="close()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;" onmouseover="this.style.borderColor='#444';this.style.color='#fff'" onmouseout="this.style.borderColor='#2a2a2a';this.style.color='#9ca3af'">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        {{-- Open in new tab --}}
+                        <a :href="previewUrl" target="_blank" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;text-decoration:none;" onmouseover="this.style.borderColor='#444';this.style.color='#fff'" onmouseout="this.style.borderColor='#2a2a2a';this.style.color='#9ca3af'" title="Open in new tab">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        </a>
+                        {{-- Close --}}
+                        <button @click="close()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#9ca3af;" onmouseover="this.style.borderColor='#444';this.style.color='#fff'" onmouseout="this.style.borderColor='#2a2a2a';this.style.color='#9ca3af'">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                 </div>
 
+                {{-- Modal Body --}}
                 <div class="modal-body">
-                    <div class="sig-sidebar">
+                    {{-- Sig sidebar: only when pending --}}
+                    <div class="sig-sidebar" x-show="docStatus === 'pending'">
                         <div class="sig-sidebar-label">Your<br>Signature</div>
                         <div class="sig-divider"></div>
-
                         <template x-if="sigSrc">
                             <div class="sig-chip" @mousedown.prevent="chipDown($event)" title="Hold and drag onto the document">
                                 <img :src="sigSrc" alt="eSignature">
@@ -451,15 +416,12 @@
                                 No eSignature.<br>Upload in profile.
                             </div>
                         </template>
-
                         <div class="sig-divider"></div>
-
                         <template x-for="(sigs,pg) in placements" :key="pg">
                             <template x-if="sigs&&sigs.length>0">
                                 <div class="page-badge" x-text="'P'+pg+': '+sigs.length+' sig'"></div>
                             </template>
                         </template>
-
                         <div class="sidebar-hint">Drag to<br>place sig</div>
                     </div>
 
@@ -468,7 +430,6 @@
                             <div class="pdf-canvas-inner" id="pdf-canvas-inner">
                                 <canvas id="pdf-render-canvas"></canvas>
                                 <div class="pdf-interact-layer"></div>
-
                                 <template x-for="sig in pageSigs(currentPage)" :key="sig.id">
                                     <div class="placed-sig"
                                          :style="`left:${sig.x}px;top:${sig.y}px;width:${sig.w}px;height:${sig.h}px;`"
@@ -482,7 +443,6 @@
                                 </template>
                             </div>
                         </div>
-
                         <div class="pdf-nav">
                             <button class="nav-btn" @click="prev()" :disabled="currentPage<=1">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
@@ -495,24 +455,37 @@
                     </div>
                 </div>
 
+                {{-- Modal Footer --}}
                 <div class="modal-footer">
                     <p style="color:#4b5563;font-size:.75rem;margin:0;display:flex;align-items:center;gap:5px;">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
-                        Hold &amp; drag sig from sidebar · Sigs are locked per-page · ‹ › to navigate
+                        <span x-text="docStatus === 'signed' ? 'Document is already signed — view only mode' : 'Hold & drag sig from sidebar · Sigs are locked per-page · ‹ › to navigate'"></span>
                     </p>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <div x-show="sendSuccess" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             ✅ Signed! Closing...
                         </div>
-                        <template x-if="!sendSuccess">
+                        <div x-show="rejectSuccess" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Rejected! Closing...
+                        </div>
+                        <template x-if="!sendSuccess && !rejectSuccess">
                             <div style="display:flex;gap:10px;align-items:center;">
                                 <button @click="close()" class="btn-view" style="cursor:pointer;">Cancel</button>
-                                <button @click="send()" :disabled="sending||!hasSigs()" class="btn-send" :class="(sending||!hasSigs())?'btn-send-disabled':''">
-                                    <svg x-show="!sending" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
-                                    <svg x-show="sending" style="animation:spin 1s linear infinite;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                                    <span x-text="sending?'Signing...':(hasSigs()?'Confirm & Send':'Place signature first')"></span>
-                                </button>
+                                <template x-if="docStatus === 'pending'">
+                                    <button @click="send()" :disabled="sending||!hasSigs()" class="btn-send" :class="(sending||!hasSigs())?'btn-send-disabled':''">
+                                        <svg x-show="!sending" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                                        <svg x-show="sending" style="animation:spin 1s linear infinite;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                                        <span x-text="sending?'Signing...':(hasSigs()?'Confirm & Send':'Place signature first')"></span>
+                                    </button>
+                                </template>
+                                <template x-if="docStatus === 'signed'">
+                                    <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10b981;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        Already Signed
+                                    </span>
+                                </template>
                             </div>
                         </template>
                     </div>
@@ -528,7 +501,8 @@
                 Pending
                 @if(($pendingCount??0)>0)<span class="tab-badge">{{ $pendingCount }}</span>@endif
             </button>
-            <button @click="activeTab='completed'" :class="activeTab==='completed'?'active':''" class="tab-btn">Completed</button>
+            <button @click="activeTab='signed'" :class="activeTab==='signed'?'active':''" class="tab-btn">Completed</button>
+            <button @click="activeTab='rejected'" :class="activeTab==='rejected'?'active':''" class="tab-btn">Rejected</button>
         </div>
 
         @forelse($documents as $doc)
@@ -541,6 +515,7 @@
                 $avatarColor  = $avatarColors[$doc->id % count($avatarColors)];
                 $avatarBg     = $avatarColor.'26';
                 $isPending    = $doc->status==='pending';
+                $isRejected   = $doc->status==='rejected';
             @endphp
 
             <div class="inbox-card"
@@ -557,35 +532,42 @@
                     <div class="doc-meta">{{ $doc->recipient_email }}</div>
 
                     <div class="flex items-center gap-3 mb-4 flex-wrap">
-                    @if($isPending)
-                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }})" class="btn-sign">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-                                Sign Document
-                            </button>
-                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }})" class="btn-view">View Details</button>
+                        @if($isPending)
+                            <span class="badge badge-pending"><span class="badge-dot"></span> Pending</span>
+                        @elseif($isRejected)
+                            <span class="badge badge-rejected"><span class="badge-dot"></span> Rejected</span>
                         @else
-                            {{-- Completed: view only, no signing allowed --}}
-                            <a href="{{ asset('storage/'.$doc->path) }}" target="_blank" class="btn-view">View Document</a>
-                            <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10b981;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="badge badge-completed">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                 Completed
                             </span>
                         @endif
                         <span class="doc-action-meta">{{ $doc->created_at->diffForHumans() }}</span>
                         <span class="doc-action-meta">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                            {{ $isPending ? 'Signature Required' : 'Signed on '.($doc->signed_at?$doc->signed_at->format('M d, Y'):$doc->updated_at->format('M d, Y')) }}
+                            @if($isPending) Signature Required
+                            @elseif($isRejected) Rejected on {{ $doc->updated_at->format('M d, Y') }}
+                            @else Signed on {{ $doc->signed_at?$doc->signed_at->format('M d, Y'):$doc->updated_at->format('M d, Y') }}
+                            @endif
                         </span>
                     </div>
 
                     <div class="flex gap-3 flex-wrap" style="margin-top:.75rem;">
                         @if($isPending)
-                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }})" class="btn-sign">
+                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }},'pending')" class="btn-sign">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
                                 Sign Document
                             </button>
+                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }},'pending')" class="btn-view">View Details</button>
+                            <button @click="rejectCard({{ $doc->id }})" class="btn-reject">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Reject
+                            </button>
+                        @elseif($isRejected)
+                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }},'rejected')" class="btn-view">View Document</button>
+                        @else
+                            <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }},'signed')" class="btn-view">View Document</button>
                         @endif
-                        <button @click="open('{{ asset('storage/'.$doc->path) }}','{{ addslashes($doc->title) }}',{{ $doc->id }})" class="btn-view">View Details</button>
                     </div>
                 </div>
             </div>
@@ -601,5 +583,4 @@
     </div>
 </div>
 
-{{-- Update DocumentController sign() to use simple ratio --}}
 </x-layouts::app>

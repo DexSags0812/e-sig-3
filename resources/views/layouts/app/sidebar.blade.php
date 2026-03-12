@@ -31,11 +31,12 @@
                             {{ __('New Request') }}
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="check-badge" :href="route('requestor.signed')" :current="request()->routeIs('requestor.signed')" wire:navigate>
-                            {{ __('Signed Docs') }}
+                            {{ __('My Requests') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="document-duplicate" :href="route('requestor.signed')" :current="request()->routeIs('documents')" wire:navigate>
-                            {{ __('Pending Requests') }}
+                        <flux:sidebar.item icon="document-duplicate" :href="route('dashboard.profile')" :current="request()->routeIs('dashboard.profile')" wire:navigate>
+                            {{ __('Profile') }}
                         </flux:sidebar.item>
+                        
 
                     {{-- SIGNEE/SIGNER VIEW --}}
                         @elseif($userRole === 'signer' || $userRole === 'signee')
@@ -43,7 +44,10 @@
                                 {{ __('Inbox') }}
                             </flux:sidebar.item>
                             <flux:sidebar.item icon="check-badge" :href="route('signee.signed')" :current="request()->routeIs('signee.signed')" wire:navigate>
-                                {{ __('Signed Documents') }}
+                                {{ __('Processed Requests') }}
+                            </flux:sidebar.item>
+                            <flux:sidebar.item icon="document-duplicate" :href="route('dashboard.profile')" :current="request()->routeIs('dashboard.profile')" wire:navigate>
+                            {{ __('Profile') }}
                             </flux:sidebar.item>
                         @endif
 
