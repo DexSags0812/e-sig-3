@@ -150,8 +150,8 @@
     </svg>
   </div>
   <div class="pr-header-text">
-    <h1>Pending Requests Dashboard</h1>
-    <p>Track and manage your PDF document requests</p>
+    <h1>Pending dex Dashboard</h1>
+    <p>Track and manasdasdadadadage your PDF document requests</p>
   </div>
 </div>
 

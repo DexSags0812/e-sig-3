@@ -242,28 +242,124 @@
 
   .empty-state svg { width: 48px; height: 48px; stroke: #333; fill: none; }
   .empty-state p { font-size: 0.9rem; color: #666; }
+
+  /* ── PDF Preview Modal ── */
+  .pdf-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .pdf-modal-overlay.active { display: flex; }
+
+  .pdf-modal-box {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 880px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeUp 0.25s ease;
+  }
+
+  .pdf-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #1e1e1e;
+    flex-shrink: 0;
+    gap: 1rem;
+  }
+
+  .pdf-modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f4f4f4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pdf-modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .pdf-modal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .pdf-modal-btn:hover { border-color: #444; color: #f4f4f4; }
+  .pdf-modal-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+
+  .pdf-modal-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    color: #888;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .pdf-modal-close:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+  .pdf-modal-frame {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #fff;
+  }
 </style>
 
 <div class="signed-wrap">
 
     {{-- Header --}}
-<div class="pr-header">
-  <div class="pr-header-icon">
-    <svg viewBox="0 0 24 24" stroke-width="1.8">
-      <path stroke-linecap="round" stroke-linejoin="round"
-        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-    </svg>
-  </div>
-  <div class="pr-header-text">
-    <h1>Pending Requests Dashboard</h1>
-    
-  </div>
-</div>
+    <div class="pr-header">
+      <div class="pr-header-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+        </svg>
+      </div>
+      <div class="pr-header-text">
+        <h1>Pending Requests Dashboard</h1>
+      </div>
+    </div>
 
     {{-- Stat Banner --}}
     <div class="stat-banner">
         <div>
-            <div class="stat-label">Total Signed Documents</div>
+            <div class="stat-label">Total Signed</div>
             <div class="stat-number">{{ $documents->count() }}</div>
         </div>
         <div class="stat-badge">
@@ -312,13 +408,14 @@
                 </div>
 
                 <div class="btn-row">
-                    <a href="{{ asset('storage/' . $doc->path) }}" target="_blank" class="btn-view">
+                    <button type="button" class="btn-view"
+                            onclick="openPdfModal('{{ asset('storage/' . $doc->path) }}', '{{ addslashes($doc->title) }}')">
                         <svg viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                         View
-                    </a>
+                    </button>
                     <a href="{{ route('documents.download', $doc->id) }}" class="btn-download">
                         <svg viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
@@ -337,4 +434,50 @@
     </div>
 
 </div>
+
+{{-- ── PDF Preview Modal ── --}}
+<div class="pdf-modal-overlay" id="pdfModal">
+    <div class="pdf-modal-box">
+        <div class="pdf-modal-header">
+            <div class="pdf-modal-title" id="pdf-modal-title">Document Preview</div>
+            <div class="pdf-modal-actions">
+                <a href="#" id="pdf-open-tab" target="_blank" class="pdf-modal-btn">
+                    <svg viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                    </svg>
+                    Open in tab
+                </a>
+                <button class="pdf-modal-close" onclick="closePdfModal()">✕</button>
+            </div>
+        </div>
+        <iframe id="pdf-modal-frame" class="pdf-modal-frame" src="about:blank"></iframe>
+    </div>
+</div>
+
+<script>
+    function openPdfModal(url, title) {
+        document.getElementById('pdf-modal-title').textContent = title;
+        document.getElementById('pdf-modal-frame').src         = url + '#toolbar=0&navpanes=0';
+        document.getElementById('pdf-open-tab').href           = url;
+        document.getElementById('pdfModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePdfModal() {
+        document.getElementById('pdfModal').classList.remove('active');
+        document.getElementById('pdf-modal-frame').src = 'about:blank';
+        document.body.style.overflow = '';
+    }
+
+    // Close when clicking the dark backdrop
+    document.getElementById('pdfModal').addEventListener('click', function (e) {
+        if (e.target === this) closePdfModal();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closePdfModal();
+    });
+</script>
+
 </x-layouts::app>
